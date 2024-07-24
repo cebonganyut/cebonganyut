@@ -1,14 +1,16 @@
+import pywhatkit
+import time
+from pywhatkit.core import core
+from pywhatkit.remotekit import start_server
 import requests
 import json
+import os
 
-API_KEY = "AIzaSyCN94L68GCs9s9hVOTNysDJHNT3m5YOEFw"
+API_KEY = os.environ.get('AIzaSyCN94L68GCs9s9hVOTNysDJHNT3m5YOEFw')
 URL = f"https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key={API_KEY}"
 
 def generate_content(user_input):
-    headers = {
-        'Content-Type': 'application/json'
-    }
-    
+    headers = {'Content-Type': 'application/json'}
     data = {
         "contents": [
             {
@@ -22,15 +24,35 @@ def generate_content(user_input):
     
     if response.status_code == 200:
         response_json = response.json()
-        # Ekstrak teks dari respons
         text = response_json['candidates'][0]['content']['parts'][0]['text']
         return text
     else:
         return f"Error: {response.status_code}, {response.text}"
 
-# Meminta input dari pengguna
-user_input = input("Masukkan pertanyaan atau pernyataan Anda: ")
+def reply_to_message(message):
+    response = generate_content(message)
+    return response
 
-# Memanggil fungsi dan mencetak hasilnya
-result = generate_content(user_input)
-print(result)
+# Inisialisasi WhatsApp
+start_server()
+print("Scan QR Code to login to WhatsApp Web")
+pywhatkit.web.open_web()
+time.sleep(30)  # Berikan waktu untuk scan QR code
+
+while True:
+    try:
+        # Cek pesan baru
+        unread = core.check_number()
+        if unread:
+            for msg in unread:
+                sender = msg['sender']
+                message = msg['message']
+                
+                # Generate dan kirim balasan
+                reply = reply_to_message(message)
+                pywhatkit.sendwhatmsg_instantly(sender, reply, wait_time=10)
+                
+        time.sleep(10)  # Tunggu 10 detik sebelum cek lagi
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        time.sleep(60)  # Jika terjadi error, tunggu 1 menit sebelum mencoba lagi

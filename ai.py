@@ -21,7 +21,10 @@ def generate_content(user_input):
     response = requests.post(URL, headers=headers, json=data)
     
     if response.status_code == 200:
-        return response.json()
+        response_json = response.json()
+        # Ekstrak teks dari respons
+        text = response_json['candidates'][0]['content']['parts'][0]['text']
+        return text
     else:
         return f"Error: {response.status_code}, {response.text}"
 
@@ -30,7 +33,4 @@ user_input = input("Masukkan pertanyaan atau pernyataan Anda: ")
 
 # Memanggil fungsi dan mencetak hasilnya
 result = generate_content(user_input)
-print(json.dumps(result, indent=2))
-```
-
-Apakah Anda ingin saya menjelaskan atau menguraikan kode ini?
+print(result)

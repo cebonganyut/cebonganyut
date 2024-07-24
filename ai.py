@@ -1,6 +1,3 @@
-Berikut adalah versi Python dari program tersebut yang memungkinkan Anda untuk memasukkan teks secara bebas:
-
-```python
 import requests
 import json
 
